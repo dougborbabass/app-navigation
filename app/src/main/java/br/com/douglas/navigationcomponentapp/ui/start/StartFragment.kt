@@ -6,12 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import br.com.douglas.navigationcomponentapp.R
 import kotlinx.android.synthetic.main.fragment_start.*
 
 class StartFragment : Fragment() {
-
-    private lateinit var listner: OnButtonClicked
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,24 +24,8 @@ class StartFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         btn_next.setOnClickListener {
-            listner.buttonCliecked()
+            findNavController().navigate(R.id.action_startFragment_to_profileFragment)
         }
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        if (context is OnButtonClicked) {
-            listner = context
-        }
-    }
-
-    companion object {
-        fun newInstance(): StartFragment {
-            return StartFragment()
-        }
-    }
-
-    interface OnButtonClicked {
-        fun buttonCliecked()
-    }
 }
