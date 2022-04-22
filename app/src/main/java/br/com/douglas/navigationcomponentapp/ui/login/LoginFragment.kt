@@ -1,19 +1,24 @@
 package br.com.douglas.navigationcomponentapp.ui.login
 
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
+import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import br.com.douglas.navigationcomponentapp.R
+import br.com.douglas.navigationcomponentapp.extensions.dismissError
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.login_fragment.*
 
 class LoginFragment : Fragment() {
 
-    private lateinit var viewModel: LoginViewModel
+    private val viewModel: LoginViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,19 +30,24 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = ViewModelProvider(this).get(LoginViewModel::class.java)
+        setHasOptionsMenu(true)
 
-        viewModel.authenticationStateEvent.observe(viewLifecycleOwner, Observer { authenticationState ->
-            when(authenticationState){
-                is LoginViewModel.AuthenticationState.InvalidAuthentication -> {
-                    val validationFields: Map<String, TextInputLayout> = initValidFields()
-                    authenticationState.fields.forEach {fieldError ->
-                        validationFields[fieldError.first]?.error = getString(fieldError.second)
+        viewModel.authenticationStateEvent.observe(
+            viewLifecycleOwner,
+            Observer { authenticationState ->
+                when (authenticationState) {
+                    is LoginViewModel.AuthenticationState.Authenticated -> {
+                        findNavController().popBackStack()
+                    }
+                    is LoginViewModel.AuthenticationState.InvalidAuthentication -> {
+                        val validationFields: Map<String, TextInputLayout> = initValidFields()
+                        authenticationState.fields.forEach { fieldError ->
+                            validationFields[fieldError.first]?.error = getString(fieldError.second)
+                        }
                     }
                 }
-            }
 
-        })
+            })
 
         buttonLoginSignIn.setOnClickListener {
             val userName = inputLoginUsername.text.toString()
@@ -45,6 +55,28 @@ class LoginFragment : Fragment() {
 
             viewModel.authentication(userName, password)
         }
+
+        inputLoginUsername.addTextChangedListener {
+            inputLayoutLoginUsername.dismissError()
+        }
+
+        inputLoginPassword.addTextChangedListener {
+            inputLayoutLoginPassword.dismissError()
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            cancelAuthentication()
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        cancelAuthentication()
+        return true
+    }
+
+    private fun cancelAuthentication() {
+        viewModel.refuseAuthentication()
+        findNavController().popBackStack(R.id.startFragment, false)
     }
 
     private fun initValidFields() = mapOf(

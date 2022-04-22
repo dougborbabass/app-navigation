@@ -7,14 +7,27 @@ import br.com.douglas.navigationcomponentapp.R
 class LoginViewModel : ViewModel() {
 
     sealed class AuthenticationState {
+        object Authenticated : AuthenticationState()
+        object Unauthenticated : AuthenticationState()
         class InvalidAuthentication(val fields: List<Pair<String, Int>>) : AuthenticationState()
     }
 
     val authenticationStateEvent = MutableLiveData<AuthenticationState>()
 
+    var userName: String = ""
+
+    init {
+        refuseAuthentication()
+    }
+
+    fun refuseAuthentication() {
+        authenticationStateEvent.value = AuthenticationState.Unauthenticated
+    }
+
     fun authentication(userName: String, password: String) {
-        if (isValidForm(userName, password)){
-            //
+        if (isValidForm(userName, password)) {
+            this.userName = userName
+            authenticationStateEvent.value = AuthenticationState.Authenticated
         }
     }
 
@@ -38,6 +51,6 @@ class LoginViewModel : ViewModel() {
 
     companion object {
         val INPUT_USERNAME = "INPUT_USERNAME" to R.string.login_input_layout_error_invalid_username
-        val INPUT_PASSWORD = "INPUT_USERNAME" to R.string.login_input_layout_error_invalid_password
+        val INPUT_PASSWORD = "INPUT_PASSWORD" to R.string.login_input_layout_error_invalid_password
     }
 }
