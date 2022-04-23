@@ -1,6 +1,5 @@
 package br.com.douglas.navigationcomponentapp.ui.start
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,7 +16,6 @@ class StartFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_start, container, false)
     }
 
@@ -25,8 +23,7 @@ class StartFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         btn_next.setOnClickListener {
-            findNavController().navigateWithAnimations(R.id.action_startFragment_to_loginFragment)
+            findNavController().navigateWithAnimations(R.id.action_startFragment_to_profileFragment)
         }
     }
-
 }

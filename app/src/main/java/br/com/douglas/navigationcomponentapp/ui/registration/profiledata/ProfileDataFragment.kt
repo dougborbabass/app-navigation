@@ -2,13 +2,18 @@ package br.com.douglas.navigationcomponentapp.ui.registration.profiledata
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import br.com.douglas.navigationcomponentapp.R
+import br.com.douglas.navigationcomponentapp.extensions.dismissError
 import br.com.douglas.navigationcomponentapp.ui.registration.RegistrationViewModel
 import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.fragment_profile_data.*
@@ -17,32 +22,33 @@ class ProfileDataFragment : Fragment() {
 
     private val registrationViewModel: RegistrationViewModel by activityViewModels()
 
+    private val navController: NavController by lazy {
+        findNavController()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_profile_data, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val validationFields = initValidationFields()
-        listenToRegistrationViewModelEvents(validationFields)
+        setHasOptionsMenu(true)
 
-        buttonProfileDataNext.setOnClickListener {
-            val name = inputProfileDataName.text.toString()
-            val profileBio = inputProfileDataBio.text.toString()
-            registrationViewModel.collectProfileData(name, profileBio)
-        }
+        val validationFields = initValidationFields()
+        listenToRegistrationStateEvent(validationFields)
+        registerViewListeners()
+        registerDeviceBackStackCallback()
     }
 
-    fun initValidationFields() = mapOf(
+    private fun initValidationFields() = mapOf(
         RegistrationViewModel.INPUT_NAME.first to inputLayoutProfileDataName,
         RegistrationViewModel.INPUT_BIO.first to inputLayoutProfileDataBio
     )
 
-    private fun listenToRegistrationViewModelEvents(validationsFields: Map<String, TextInputLayout>) {
+    private fun listenToRegistrationStateEvent(validationFields: Map<String, TextInputLayout>) {
         registrationViewModel.registrationStateEvent.observe(
             viewLifecycleOwner,
             Observer { registrationState ->
@@ -52,15 +58,47 @@ class ProfileDataFragment : Fragment() {
                         val directions = ProfileDataFragmentDirections
                             .actionProfileDataFragmentToChooseCredentialsFragment(name)
 
-                        findNavController().navigate(directions)
+                        navController.navigate(directions)
                     }
                     is RegistrationViewModel.RegistrationState.InvalidProfileData -> {
                         registrationState.fields.forEach { fieldError ->
-                            validationsFields[fieldError.first]?.error =
-                                getString(fieldError.second)
+                            validationFields[fieldError.first]?.error = getString(fieldError.second)
                         }
                     }
                 }
             })
+    }
+
+    private fun registerViewListeners() {
+        buttonProfileDataNext.setOnClickListener {
+            val name = inputProfileDataName.text.toString()
+            val bio = inputProfileDataBio.text.toString()
+
+            registrationViewModel.collectProfileData(name, bio)
+        }
+
+        inputProfileDataName.addTextChangedListener {
+            inputLayoutProfileDataName.dismissError()
+        }
+
+        inputProfileDataBio.addTextChangedListener {
+            inputLayoutProfileDataBio.dismissError()
+        }
+    }
+
+    private fun registerDeviceBackStackCallback() {
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            cancelRegistration()
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        cancelRegistration()
+        return true
+    }
+
+    private fun cancelRegistration() {
+        registrationViewModel.userCancelledRegistration()
+        navController.popBackStack(R.id.loginFragment, false)
     }
 }
