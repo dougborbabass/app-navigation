@@ -36,4 +36,6 @@
     <string name="choose_credentials_input_layout_error_invalid_username">Invalid username</string>
     <string name="choose_credentials_input_layout_error_invalid_password">Invalid password</string>
     <string name="choose_credentials_text_name">%1$s, choose your credentials</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

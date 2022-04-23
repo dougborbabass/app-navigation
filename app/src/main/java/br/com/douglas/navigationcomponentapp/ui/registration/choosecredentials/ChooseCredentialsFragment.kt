@@ -1,32 +1,30 @@
-package br.com.douglas.navigationcomponentapp.ui.start
+package br.com.douglas.navigationcomponentapp.ui.registration.choosecredentials
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import br.com.douglas.navigationcomponentapp.R
-import br.com.douglas.navigationcomponentapp.extensions.navigateWithAnimations
-import kotlinx.android.synthetic.main.fragment_start.*
+import kotlinx.android.synthetic.main.fragment_choose_credentials.*
 
-class StartFragment : Fragment() {
+class ChooseCredentialsFragment : Fragment() {
+
+    private val args: ChooseCredentialsFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_start, container, false)
+        return inflater.inflate(R.layout.fragment_choose_credentials, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        btn_next.setOnClickListener {
-            findNavController().navigateWithAnimations(R.id.action_startFragment_to_loginFragment)
-        }
+        val name = args.name
+        textChooseCredentialsName.text = getString(R.string.choose_credentials_text_name, name)
     }
-
 }
